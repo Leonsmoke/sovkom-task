@@ -1,0 +1,27 @@
+server:
+  port: 8080
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8089/eureka
+
+spring:
+  application:
+    name: gateway-service
+
+  cloud:
+    gateway:
+      routes:
+        - id: email-service
+          uri: lb://EMAIL-SERVICE
+          predicates:
+            - Path=/email/**
+        - id: push-service
+          uri: lb://PUSH-SERVICE
+          predicates:
+            - Path=/push/**
+        - id: sms-service
+          uri: lb://SMS-SERVICE
+          predicates:
+            - Path=/sms/**

@@ -1,0 +1,59 @@
+version: '3.7'
+services:
+    server-discovery:
+        build: ./server-discovery/
+        ports:
+        - '8089:8089'
+        container_name: server-discovery
+        networks:
+        - shared-net
+    email-service:
+        build: ./email-service/
+        container_name: email-service
+        ports:
+        - '8081:8081'
+        depends_on:
+        - server-discovery
+        networks:
+        - shared-net
+        environment:
+        - eureka.client.serviceUrl.defaultZone=http://server-discovery:8089/eureka
+    push-service:
+        build: ./push-service/
+        container_name: push-service
+        ports:
+        - '8082:8082'
+        depends_on:
+        - server-discovery
+        networks:
+        - shared-net
+        environment:
+        - eureka.client.serviceUrl.defaultZone=http://server-discovery:8089/eureka
+    sms-service:
+        build: ./sms-service/
+        container_name: sms-service
+        ports:
+        - '8083:8083'
+        depends_on:
+        - server-discovery
+        networks:
+        - shared-net
+        environment:
+        - eureka.client.serviceUrl.defaultZone=http://server-discovery:8089/eureka
+    api-gateway:
+        build: ./api-gateway/
+        ports:
+        - '8080:8080'
+        container_name: api-gateway
+        depends_on:
+        - email-service
+        - push-service
+        - sms-service
+        networks:
+        - shared-net
+        environment:
+        - eureka.client.serviceUrl.defaultZone=http://server-discovery:8089/eureka
+        
+networks:
+    shared-net:
+        driver: bridge
